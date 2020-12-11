@@ -48,13 +48,14 @@ Configuration wizard, currently features the following configuration
 - Clone the repo
   
   ```bash
-  git clone https://github.com/k8-proxy/GW-proxy
+  git clone https://github.com/k8-proxy/vmware-scripts.git
   ```
 
 - Install the wizard as following
   
   ```bash
-  sudo install GW-proxy/automation/scripts/wizard/wizard.sh -T /usr/bin/wizard -m 0755
+  sudo install GW-proxy/automation/scripts/wizard/wizard.sh -T /usr/bin/wizard.sh -m 0755
+  /usr/bin/wizard.sh
   ```
 
 ## Boot script configuration
@@ -83,7 +84,7 @@ exit
 
 - Change initconfig.sh to execute mode 
 ```
-chmod 755 /usr/bin/initconfig.sh
+sudo chmod 755 /usr/bin/initconfig.sh
 ```	
 - Create init service
 ```
@@ -109,9 +110,9 @@ WantedBy=cloud-init.target
 ```
 - Reload and enable initconfig
 ```
-systemctl daemon-reload
+sudo systemctl daemon-reload
 	
-systemctl enable initconfig
+sudo systemctl enable initconfig
 ```
  
 - To reanable First Boot experience you can issue only the last command.
