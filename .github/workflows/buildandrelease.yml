@@ -37,7 +37,7 @@ jobs:
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.PRIVATE_KEY }}
+        password: ${{ secrets.PASSWORD }}
         script: |
            rm -rf ${{ env.OVA_BUILD_DIR }}/*
     - name: copy code to the server
