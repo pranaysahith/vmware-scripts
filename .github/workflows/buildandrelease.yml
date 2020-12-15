@@ -37,7 +37,7 @@ jobs:
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
-        password: ${{ secrets.PASSWORD }}
+        password: ${{ secrets.SSH_PASSWORD }}
         script: |
            rm -rf ${{ env.OVA_BUILD_DIR }}/*
     - name: copy code to the server
@@ -45,7 +45,7 @@ jobs:
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
-        password: ${{ secrets.PASSWORD }}
+        password: ${{ secrets.SSH_PASSWORD }}
         local: ${{ github.workspace }}/vmware-scripts
         remote: ${{ env.OVA_BUILD_DIR }}/vmware-scripts
 
@@ -57,12 +57,12 @@ jobs:
         ESXI_PASSWORD: "${{ secrets.ESXI_PASSWORD }}"
         VM_HOST: ${{ secrets.VM_HOST }}
         VM_USER: ${{ secrets.VM_USER }}
-        VM_PASSWORD: ${{ secrets.PASSWORD }}
+        VM_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         OVA_BUILD_DIR: ${{ env.OVA_BUILD_DIR }}
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
-        password: ${{ secrets.PASSWORD }}
+        password: ${{ secrets.SSH_PASSWORD }}
         timeout: 60s
         command_timeout: 10000s
         envs: ESXI_HOST,ESXI_USER,ESXI_PASSWORD,VM_HOST,VM_USER,VM_PASSWORD,OVA_BUILD_DIR,VM_GATEWAY
@@ -98,7 +98,7 @@ jobs:
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
-        password: ${{ secrets.PASSWORD }}
+        password: ${{ secrets.SSH_PASSWORD }}
         timeout: 1000s
         envs: AWS_DEFAULT_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY
         script: |
