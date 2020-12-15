@@ -32,7 +32,7 @@ jobs:
       with:
         path: vmware-scripts
 
-    - name: remove previously created OVA and clear direcotries
+    - name: Remove previously created OVA and clear direcotries
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -40,7 +40,7 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         script: |
            rm -rf ${{ env.OVA_BUILD_DIR }}/*
-    - name: copy code to the server
+    - name: Copy code to the server
       uses: garygrossgarten/github-action-scp@release
       with:
         host: ${{ secrets.SSH_HOST }}
@@ -59,6 +59,7 @@ jobs:
         VM_USER: ${{ secrets.VM_USER }}
         VM_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         OVA_BUILD_DIR: ${{ env.OVA_BUILD_DIR }}
+        VM_GATEWAY: ${{ secrets.VM_GATEWAY }}
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
