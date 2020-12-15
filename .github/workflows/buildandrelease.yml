@@ -1,0 +1,107 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+env:
+  OVA_BUILD_DIR: "/home/glasswall/git-build-dir"
+  OVA_OUTPUT_DIR:  "output-vmware-iso"
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'OVA name'
+        required: true
+        default: 'proxy-rebuild'
+  push:
+    branches: [ master, github_actions ]
+    paths-ignore: 
+      - 'diagrams/**'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:   
+  build-and-release-ova:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+
+    # Checks-out your repository under $GITHUB_WORKSPACE/vmware-scripts, so your job can access it  
+    - uses: actions/checkout@v2
+      with:
+        path: vmware-scripts
+
+    - name: remove previously created OVA and clear direcotries
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        script: |
+           rm -rf ${{ env.OVA_BUILD_DIR }}/*
+    - name: copy code to the server
+      uses: garygrossgarten/github-action-scp@release
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        local: ${{ github.workspace }}/vmware-scripts
+        remote: ${{ env.OVA_BUILD_DIR }}/vmware-scripts
+
+    - name: Build the OVA on a remote VM
+      uses: appleboy/ssh-action@master
+      env:
+        ESXI_HOST: "${{ secrets.ESXI_HOST }}"
+        ESXI_USER: "${{ secrets.ESXI_USER }}"
+        ESXI_PASSWORD: "${{ secrets.ESXI_PASSWORD }}"
+        VM_HOST: ${{ secrets.VM_HOST }}
+        VM_USER: ${{ secrets.VM_USER }}
+        VM_PASSWORD: ${{ secrets.PASSWORD }}
+        OVA_BUILD_DIR: ${{ env.OVA_BUILD_DIR }}
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        timeout: 60s
+        command_timeout: 10000s
+        envs: ESXI_HOST,ESXI_USER,ESXI_PASSWORD,VM_HOST,VM_USER,VM_PASSWORD,OVA_BUILD_DIR,VM_GATEWAY
+        script: |
+          cd ${OVA_BUILD_DIR}/vmware-scripts/packer
+          cat > vars.json <EOF
+          {
+          "hostname":       "glasswall",
+          "domain":         "local",
+          "ssh_user":       "$VM_USER",
+          "ssh_pass":       "$VM_PASSWORD",
+          "cd_dir":         "cdrom",
+          "esxi_host":      "$ESXI_HOST",
+          "esxi_datastore": "datastore1",
+          "esxi_username":  "$ESXI_USER",
+          "esxi_password":  "$ESXI_PASSWORD",
+          "vswitch":        "VM",
+          "ssh_host":       "$VM_HOST"
+          }
+          EOF
+          cp cdrom/user-data.example cdrom/user-data
+          sed -i "s|GATEWAY|$VM_GATEWAY|g" cdrom/user-data
+          sed -i "s|IPADDRESS/NETMASK|$VM_HOST/27|g" cdrom/user-data
+          sed -i "s|NAMESERVER|8.8.8.8|g" cdrom/user-data
+          packer build -on-error=cleanup -var-file=vars.json esxi.json
+
+    - name: Upload the OVA to S3
+      uses: appleboy/ssh-action@master
+      env:
+        AWS_DEFAULT_REGION: "${{ secrets.AWS_DEFAULT_REGION }}"
+        AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+        AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        timeout: 1000s
+        envs: AWS_DEFAULT_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY
+        script: |
+           mv ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/gw-proxy.ova ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/gw-proxy-${{ github.sha }}.ova
+           aws s3 cp ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/gw-proxy-${{ github.sha }}.ova s3://glasswall-sow-ova/vms/proxy-rebuild/
+          
