@@ -81,7 +81,10 @@ jobs:
           "esxi_username":  "$ESXI_USER",
           "esxi_password":  "$ESXI_PASSWORD",
           "vswitch":        "VM",
-          "ssh_host":       "$VM_HOST"
+          "ssh_host":       "$VM_HOST",
+          "vm_name":        "gw-proxy",
+          "memory":         "2048",
+          "cpu":            "2"
           }
           EOF
           cp cdrom/user-data.example cdrom/user-data
