@@ -68,7 +68,7 @@ jobs:
         envs: ESXI_HOST,ESXI_USER,ESXI_PASSWORD,VM_HOST,VM_USER,VM_PASSWORD,OVA_BUILD_DIR,VM_GATEWAY
         script: |
           cd ${OVA_BUILD_DIR}/vmware-scripts/packer
-          cat > vars.json <EOF
+          cat > vars.json <<EOF
           {
           "hostname":       "glasswall",
           "domain":         "local",
