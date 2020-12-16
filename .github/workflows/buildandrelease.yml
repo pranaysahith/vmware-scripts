@@ -51,7 +51,7 @@ jobs:
 
     - name: Set env vars
       run: |
-        VM_NAME=${{ github.event.inputs.name }:-visualog}
+        VM_NAME=${{ github.event.inputs.name }}
         echo "VM_NAME is $VM_NAME"
         echo "VM_NAME=$(echo ${VM_NAME:-proxy-rebuild})" >> $GITHUB_ENV
 
