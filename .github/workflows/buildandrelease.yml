@@ -4,7 +4,6 @@ name: CI
 env:
   OVA_BUILD_DIR: "/home/glasswall/git-build-dir"
   OVA_OUTPUT_DIR:  "output-vmware-iso"
-  VM_NAME: "proxy-rebuild"
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
@@ -61,7 +60,7 @@ jobs:
         VM_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         OVA_BUILD_DIR: ${{ env.OVA_BUILD_DIR }}
         VM_GATEWAY: ${{ secrets.VM_GATEWAY }}
-        VM_NAME: ${{ env.VM_NAME }}
+        VM_NAME: ${{ github.event.inputs.name }}"
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
@@ -103,7 +102,7 @@ jobs:
         AWS_DEFAULT_REGION: "${{ secrets.AWS_DEFAULT_REGION }}"
         AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
         AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-        VM_NAME: ${{ env.VM_NAME }}
+        VM_NAME: ${{ github.event.inputs.name }}"
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
