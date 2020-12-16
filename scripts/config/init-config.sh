@@ -14,6 +14,11 @@ sudo apt install -y telnet tcpdump open-vm-tools net-tools dialog curl git sed g
 
 # switching to predictable network interfaces naming
 grep "$KERNEL_BOOT_LINE" /etc/default/grub >/dev/null || sudo sed -Ei "s/GRUB_CMDLINE_LINUX=\"(.*)\"/GRUB_CMDLINE_LINUX=\"\1 $KERNEL_BOOT_LINE\"/g" /etc/default/grub
+
+# remove swap 
+sudo swapoff -a && sudo rm -f /swap.img && sudo sed -i '/swap.img/d' /etc/fstab && echo Swap removed
+
+# update grub
 sudo update-grub
 
 # cloning vmware scripts repo
@@ -31,19 +36,18 @@ sudo systemctl daemon-reload
 sudo systemctl enable initconfig
 
 # install node exporter
-wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz -qO- | tar xz -C /tmp/ 
+wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz -qO- | tar xz -C /tmp/
 sudo install -T /tmp/node_exporter-1.0.1.linux-amd64/node_exporter /usr/local/bin/node_exporter -m 0755
-sudo ln -s /usr/local/bin/node_exporter /usr/sbin/node_exporter
 
 # create node exporter user
 sudo useradd node_exporter -s /sbin/nologin
 
 # create node exporter service
-sudo cp ~/scripts/visuallog/monitoring-scripts/node_exporter.service /etc/systemd/system/node_exporter.service
+sudo cp ~/scripts/visualog/monitoring-scripts/node_exporter.service /etc/systemd/system/node_exporter.service
 sudo mkdir -p /etc/prometheus
 
 # install node exporter configuration
-sudo cp ~/scripts/visuallog/monitoring-scripts/node_exporter.config /etc/prometheus/node_exporter.config
+sudo cp ~/scripts/visualog/monitoring-scripts/node_exporter.config /etc/prometheus/node_exporter.config
 sudo systemctl daemon-reload
 
 # start and enable node_exporter service
