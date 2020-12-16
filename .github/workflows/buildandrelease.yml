@@ -51,9 +51,10 @@ jobs:
 
     - name: Set env vars
       run: |
-        VM_NAME=${{ github.event.inputs.name }}
-        echo "VM_NAME is $VM_NAME"
+        if [[ -z ${{ github.event.inputs.name }} ]];then
+        # builds proxy-rebuild ova by default.
         echo "VM_NAME=$(echo ${VM_NAME:-proxy-rebuild})" >> $GITHUB_ENV
+        fi
 
     - name: Build the OVA on a remote VM
       uses: appleboy/ssh-action@master
