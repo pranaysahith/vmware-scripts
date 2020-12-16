@@ -14,7 +14,7 @@ on:
         required: true
         default: 'proxy-rebuild'
   push:
-    branches: [ master, github_actions ]
+    branches: [ main, github_actions ]
     paths-ignore: 
       - 'diagrams/**'
 
