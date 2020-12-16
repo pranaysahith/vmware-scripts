@@ -66,7 +66,7 @@ jobs:
         VM_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         OVA_BUILD_DIR: ${{ env.OVA_BUILD_DIR }}
         VM_GATEWAY: ${{ secrets.VM_GATEWAY }}
-        VM_NAME: ${{ github.event.inputs.name }}
+        VM_NAME: ${{ env.VM_NAME }}
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
@@ -108,7 +108,7 @@ jobs:
         AWS_DEFAULT_REGION: "${{ secrets.AWS_DEFAULT_REGION }}"
         AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
         AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-        VM_NAME: ${{ github.event.inputs.name }}
+        VM_NAME: ${{ env.VM_NAME }}
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
