@@ -49,6 +49,12 @@ jobs:
         local: ${{ github.workspace }}/vmware-scripts
         remote: ${{ env.OVA_BUILD_DIR }}/vmware-scripts
 
+    - name: Set env vars
+      run: |
+        VM_NAME=${{ github.event.inputs.name }:-visualog}
+        echo "VM_NAME is $VM_NAME"
+        echo "VM_NAME=$(echo ${VM_NAME:-proxy-rebuild})" >> $GITHUB_ENV
+
     - name: Build the OVA on a remote VM
       uses: appleboy/ssh-action@master
       env:
@@ -102,7 +108,7 @@ jobs:
         AWS_DEFAULT_REGION: "${{ secrets.AWS_DEFAULT_REGION }}"
         AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
         AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-        VM_NAME: ${{ github.event.inputs.name }}"
+        VM_NAME: ${{ github.event.inputs.name }}
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
