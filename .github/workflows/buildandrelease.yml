@@ -4,6 +4,7 @@ name: CI
 env:
   OVA_BUILD_DIR: "/home/glasswall/git-build-dir"
   OVA_OUTPUT_DIR:  "output-vmware-iso"
+  VM_NAME: "proxy-rebuild"
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
@@ -60,13 +61,14 @@ jobs:
         VM_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         OVA_BUILD_DIR: ${{ env.OVA_BUILD_DIR }}
         VM_GATEWAY: ${{ secrets.VM_GATEWAY }}
+        VM_NAME: ${{ env.VM_NAME }}
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         timeout: 60s
         command_timeout: 10000s
-        envs: ESXI_HOST,ESXI_USER,ESXI_PASSWORD,VM_HOST,VM_USER,VM_PASSWORD,OVA_BUILD_DIR,VM_GATEWAY
+        envs: ESXI_HOST,ESXI_USER,ESXI_PASSWORD,VM_HOST,VM_USER,VM_PASSWORD,OVA_BUILD_DIR,VM_GATEWAY,VM_NAME
         script: |
           cd ${OVA_BUILD_DIR}/vmware-scripts/packer
           cat > vars.json <<EOF
@@ -82,7 +84,7 @@ jobs:
           "esxi_password":  "$ESXI_PASSWORD",
           "vswitch":        "VM",
           "ssh_host":       "$VM_HOST",
-          "vm_name":        "gw-proxy",
+          "vm_name":        "$VM_NAME",
           "memory":         "2048",
           "cpu":            "2"
           }
@@ -91,6 +93,8 @@ jobs:
           sed -i "s|GATEWAY|$VM_GATEWAY|g" cdrom/user-data
           sed -i "s|IPADDRESS/NETMASK|$VM_HOST/27|g" cdrom/user-data
           sed -i "s|NAMESERVER|8.8.8.8|g" cdrom/user-data
+          mv setup setup.orig
+          mv ../$VM_NAME setup
           packer build -on-error=cleanup -var-file=vars.json esxi.json
 
     - name: Upload the OVA to S3
@@ -99,13 +103,14 @@ jobs:
         AWS_DEFAULT_REGION: "${{ secrets.AWS_DEFAULT_REGION }}"
         AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
         AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        VM_NAME: ${{ env.VM_NAME }}
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         timeout: 1000s
-        envs: AWS_DEFAULT_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY
+        envs: AWS_DEFAULT_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,VM_NAME
         script: |
-           mv ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/gw-proxy.ova ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/gw-proxy-${{ github.sha }}.ova
-           aws s3 cp ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/gw-proxy-${{ github.sha }}.ova s3://glasswall-sow-ova/vms/proxy-rebuild/
+           mv ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/$VM_NAME.ova ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/$VM_NAME-${{ github.sha }}.ova
+           aws s3 cp ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/$VM_NAME-${{ github.sha }}.ova s3://glasswall-sow-ova/vms/$VM_NAME/
           
