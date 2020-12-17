@@ -51,7 +51,7 @@ jobs:
 
     - name: Set env vars
       run: |
-        if [[ -z ${{ github.event.inputs.name }} ]];then
+        if [[ -z "${{ github.event.inputs.name }}" ]];then
         # builds proxy-rebuild ova by default.
         echo "VM_NAME=$(echo ${VM_NAME:-proxy-rebuild})" >> $GITHUB_ENV
         fi
