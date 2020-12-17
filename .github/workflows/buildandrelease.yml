@@ -117,6 +117,6 @@ jobs:
         timeout: 1000s
         envs: AWS_DEFAULT_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,VM_NAME
         script: |
-           mv ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/$VM_NAME.ova ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/$VM_NAME-${{ github.sha }}.ova
+           mv ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/packer-$VM_NAME.ova ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/$VM_NAME-${{ github.sha }}.ova
            aws s3 cp ${{ env.OVA_BUILD_DIR }}/vmware-scripts/packer/${{ env.OVA_OUTPUT_DIR }}/$VM_NAME-${{ github.sha }}.ova s3://glasswall-sow-ova/vms/$VM_NAME/
           
