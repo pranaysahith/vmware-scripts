@@ -90,7 +90,7 @@ jobs:
           "esxi_password":  "$ESXI_PASSWORD",
           "vswitch":        "VM",
           "ssh_host":       "$VM_HOST",
-          "vm_name":        "$VM_NAME",
+          "vm_name":        "packer-$VM_NAME",
           "memory":         "2048",
           "cpu":            "2"
           }
