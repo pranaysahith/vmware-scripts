@@ -14,17 +14,14 @@ file.close()
 servers = []
 for x, y, z in zip(names, ips, port):
     servers.append("  server " + x + " " + y + ":" + z + " check")
-
-servers_list = servers[0:]
-new_servers = "\n".join(servers_list)
-
-tmp_file = open("haproxy.tmp", "r")
-content = tmp_file.readlines()
-tmp_file.close()
-content.insert(45, new_servers)
-tmp_file = open("/etc/haproxy/haproxy.cfg", "w")
+servers = "\n".join(servers)
+template_file = open("haproxy.tmp", "r")
+content = template_file.readlines()
+template_file.close()
+content.insert(45, servers)
+generated_file = open("/etc/haproxy/haproxy.cfg", "w")
 content = "".join(content)
-tmp_file.write(content)
-tmp_file.close()
+generated_file.write(content)
+generated_file.close()
 os.system("sudo /etc/init.d/haproxy reload")
 os.system("sudo /etc/init.d/haproxy status | head -11")
